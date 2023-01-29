@@ -117,7 +117,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["load-duration-curve_files/figure-html5/unnamed-chunk-2-1.png"]}
+  {"type":"character","attributes":{},"value":["load-duration-curve_files/anchor-4.2.2/anchor.min.js","load-duration-curve_files/bowser-1.9.3/bowser.min.js","load-duration-curve_files/distill-2.2.21/template.v2.js","load-duration-curve_files/figure-html5/unnamed-chunk-2-1.png","load-duration-curve_files/header-attrs-2.20/header-attrs.js","load-duration-curve_files/jquery-3.6.0/jquery-3.6.0.js","load-duration-curve_files/jquery-3.6.0/jquery-3.6.0.min.js","load-duration-curve_files/jquery-3.6.0/jquery-3.6.0.min.map","load-duration-curve_files/popper-2.6.0/popper.min.js","load-duration-curve_files/tippy-6.2.7/tippy-bundle.umd.min.js","load-duration-curve_files/tippy-6.2.7/tippy-light-border.css","load-duration-curve_files/tippy-6.2.7/tippy.css","load-duration-curve_files/tippy-6.2.7/tippy.umd.min.js","load-duration-curve_files/webcomponents-2.0.0/webcomponents.js"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
   <!--/radix_placeholder_navigation_in_header-->
@@ -1513,6 +1513,34 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 
 <div class="d-article">
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>## compare countries</span></span>
+<span></span>
+<span><span class='va'>zones</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span></span>
+<span>  <span class='st'>"10YCH-SWISSGRIDZ"</span>, <span class='st'>"10YAT-APG------L"</span>,</span>
+<span>  <span class='st'>"10Y1001A1001A82H"</span>, <span class='st'>"10Y1001A1001A73I"</span></span>
+<span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>token</span> <span class='op'>&lt;-</span> <span class='fu'>keyring</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/keyring/man/key_get.html'>key_get</a></span><span class='op'>(</span><span class='st'>"entsoe"</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>load</span> <span class='op'>&lt;-</span></span>
+<span>  <span class='fu'><a href='https://purrr.tidyverse.org/reference/map_dfr.html'>map_df</a></span><span class='op'>(</span></span>
+<span>    <span class='va'>zones</span>,</span>
+<span>    <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/pkg/entsoeapi/man/en_load_actual_total_load.html'>en_load_actual_total_load</a></span><span class='op'>(</span></span>
+<span>      eic <span class='op'>=</span> <span class='va'>.x</span>,</span>
+<span>      period_start <span class='op'>=</span> <span class='st'>"2022-01-01"</span>,</span>
+<span>      period_end <span class='op'>=</span> <span class='st'>"2022-12-21"</span>,</span>
+<span>      security_token <span class='op'>=</span> <span class='va'>token</span></span>
+<span>    <span class='op'>)</span></span>
+<span>  <span class='op'>)</span></span>
+<span></span>
+<span></span>
+<span><span class='va'>mean_quantity</span> <span class='op'>&lt;-</span> <span class='va'>load</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>out_bidding_zone</span><span class='op'>)</span> <span class='op'>|&gt;</span> </span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarise</a></span><span class='op'>(</span>mean_quantity <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>quantity</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
 <h2 id="plot-load-duration-curves-for-selected-bidding-zones">Plot Load duration curves for selected bidding zones</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -1527,6 +1555,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>quantity <span class='op'>=</span> <span class='va'>quantity</span> <span class='op'>/</span> <span class='va'>mean_quantity</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>rn</span>, <span class='va'>quantity</span>, color <span class='op'>=</span> <span class='va'>AreaName</span>, group <span class='op'>=</span> <span class='va'>AreaName</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_path.html'>geom_line</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_abline.html'>geom_hline</a></span><span class='op'>(</span>yintercept <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span><span class='op'>+</span></span>
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
 <p><img src="load-duration-curve_files/figure-html5/unnamed-chunk-2-1.png" width="624" /></p>

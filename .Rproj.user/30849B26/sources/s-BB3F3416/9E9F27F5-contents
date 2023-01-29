@@ -10,7 +10,7 @@ library(tidyverse)
 library(lubridate)
 ```
 
-```{r include=FALSE}
+```{r echo=TRUE, message=FALSE, warning=FALSE}
 ## compare countries
 en_eic() |>
   filter(AreaTypeCode == "BZN")
@@ -21,7 +21,7 @@ zones <- c(
   "10Y1001A1001A82H", "10Y1001A1001A73I"
 )
 
-token <- keyring::key_get("entose")
+token <- keyring::key_get("entsoe")
 
 load <-
   map_df(
@@ -37,11 +37,13 @@ load <-
 
 mean_quantity <- load |>
   group_by(out_bidding_zone) |> 
-  summarise(mean_quantity = mean(quantity), max(quantity))
+  summarise(
+    mean_quantity = mean(quantity)
+    )
 ```
 
 ## Plot Load duration curves for selected bidding zones
-```{r}
+```{r, fig.width=10, fig.height=7}
 load |>
   filter(quantity < 150000) |> 
   group_by(out_bidding_zone) |>

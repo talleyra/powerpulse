@@ -6,26 +6,26 @@
     "author": [],
     "date": "2023-01-29",
     "categories": [],
-    "contents": "\nPlot Load duration curves for selected bidding zones\n\n\nload |>\n  filter(quantity < 150000) |> \n  group_by(out_bidding_zone) |>\n  summarise_by_time(dt, .by = \"hour\", quantity = mean(quantity)) |> \n  arrange(desc(quantity)) |> \n  mutate(rn = row_number()) |>\n  left_join(mean_quantity, by = \"out_bidding_zone\") |> \n  left_join(en_eic() |> filter(AreaTypeCode == \"BZN\"), by = c(\"out_bidding_zone\" = \"AreaCode\")) |> \n  mutate(quantity = quantity / mean_quantity) |>\n  ggplot(aes(rn, quantity, color = AreaName, group = AreaName)) +\n  geom_line() +\n  theme_bw()\n\n\n\n\n\n\n",
+    "contents": "\n\n\n## compare countries\n\nzones <- c(\n  \"10YCH-SWISSGRIDZ\", \"10YAT-APG------L\",\n  \"10Y1001A1001A82H\", \"10Y1001A1001A73I\"\n)\n\ntoken <- keyring::key_get(\"entsoe\")\n\nload <-\n  map_df(\n    zones,\n    ~ en_load_actual_total_load(\n      eic = .x,\n      period_start = \"2022-01-01\",\n      period_end = \"2022-12-21\",\n      security_token = token\n    )\n  )\n\n\nmean_quantity <- load |>\n  group_by(out_bidding_zone) |> \n  summarise(mean_quantity = mean(quantity))\n\n\nPlot Load duration curves for selected bidding zones\n\n\nload |>\n  filter(quantity < 150000) |> \n  group_by(out_bidding_zone) |>\n  summarise_by_time(dt, .by = \"hour\", quantity = mean(quantity)) |> \n  arrange(desc(quantity)) |> \n  mutate(rn = row_number()) |>\n  left_join(mean_quantity, by = \"out_bidding_zone\") |> \n  left_join(en_eic() |> filter(AreaTypeCode == \"BZN\"), by = c(\"out_bidding_zone\" = \"AreaCode\")) |> \n  mutate(quantity = quantity / mean_quantity) |>\n  ggplot(aes(rn, quantity, color = AreaName, group = AreaName)) +\n  geom_line() +\n  geom_hline(yintercept = 1)+\n  theme_bw()\n\n\n\n\n\n\n",
     "preview": "posts/2023-01-29-load-duration-curve/load-duration-curve_files/figure-html5/unnamed-chunk-2-1.png",
-    "last_modified": "2023-01-29T19:29:42+01:00",
+    "last_modified": "2023-01-29T21:20:53+01:00",
     "input_file": {}
   },
   {
     "path": "posts/welcome/",
-    "title": "Welcome to powerpulse",
-    "description": "Welcome to our new blog, powerpulse. We hope you enjoy \nreading what we have to say!",
+    "title": "powerpulse",
+    "description": "Distill blog",
     "author": [
       {
-        "name": "Nora Jones",
-        "url": "https://example.com/norajones"
+        "name": "Hans Jakob Leiter Prossliner",
+        "url": {}
       }
     ],
     "date": "2023-01-29",
     "categories": [],
     "contents": "\n\n\n\n",
     "preview": {},
-    "last_modified": "2023-01-29T19:23:48+01:00",
+    "last_modified": "2023-01-29T21:10:44+01:00",
     "input_file": {}
   }
 ]

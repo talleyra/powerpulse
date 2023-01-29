@@ -4,7 +4,6 @@ description: |
   Distill blog
 author:
   - name: Hans Jakob Leiter Prossliner
-    url: https://example.com/norajones
 date: 01-29-2023
 output:
   distill::distill_article:
