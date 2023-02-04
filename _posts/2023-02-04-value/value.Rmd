@@ -10,7 +10,7 @@ output:
 ---
 
 
-```{r setup, include=FALSE}
+```{r setup}
 
 library(entsoeapi)
 library(tidyverse)
@@ -85,7 +85,7 @@ value_analysis_daily <-
 
 ```
 
-```{r}
+```{r, layout="l-screen-inset"}
 
 p1 <- value_analysis_daily %>% 
   ungroup() %>% 
