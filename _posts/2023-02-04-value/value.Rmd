@@ -1,0 +1,125 @@
+---
+title: "value"
+description: |
+  A short description of the post.
+author: [Hans Jakob Leiter Prossliner]
+date: 2023-02-04
+output:
+  distill::distill_article:
+    self_contained: false
+---
+
+
+```{r setup, include=FALSE}
+
+library(entsoeapi)
+library(tidyverse)
+library(lubridate)
+library(furrr)
+
+# token <- keyring::key_get("entsoe")
+# 
+# dates <- make_date(year = 2016:2024, month = 1, day = 1)
+# 
+# en_eic() %>% 
+#   filter(str_detect(MapCode, "IT"))
+# 
+# it_north = "10Y1001A1001A73I"
+# 
+# df <- tibble(
+#   eic = ,
+#   period_start = lag(dates),
+#   period_end = dates
+# ) %>% 
+#   drop_na()
+# 
+# plan(multisession, workers = 4)
+# 
+# df_prices <- furrr::future_pmap_dfr(
+#   df, ~ en_transmission_day_ahead_prices(
+#     ...,
+#     security_token = token
+#   ),
+#   .progress = TRUE
+# )
+# 
+# df_generation <- furrr::future_pmap_dfr(
+#   df, ~ en_generation_agg_gen_per_type(
+#     ...,
+#     security_token = token
+#   ),
+#   .progress = TRUE
+# )
+
+
+df_prices <- arrow::read_parquet("./_data/it_north_prices.parquet")
+df_generation <- arrow::read_parquet("./_data/it_north_generation.parquet")
+```
+
+
+```{r}
+
+value_analysis_prep <- df_generation %>% 
+  mutate(quantity = if_else(!is.na(outbiddingzone_domain_mrid), -quantity, quantity)) %>% 
+  select(start, source = resource_psr_type_def, quantity) %>% 
+  left_join(df_prices %>% select(dt, price), by = c("start" = "dt")) %>% 
+  mutate(revenue = quantity * price) %>% 
+  filter(quantity != 0)
+
+
+value_analysis_daily <- 
+  value_analysis_prep %>% 
+  group_by(date = date(start), source) %>% 
+  summarise(
+    total_prod = sum(quantity), 
+    total_revenue = sum(revenue),
+    normalized_revenue = total_revenue/total_prod,
+    tobaseline = normalized_revenue/mean(price),
+    ) %>% 
+  ungroup() %>% 
+  group_by(date) %>% 
+  mutate(
+    total_aggr_prod = sum(total_prod),
+    share = round(total_prod/total_aggr_prod, 4)
+  )
+
+```
+
+```{r}
+
+p1 <- value_analysis_daily %>% 
+  ungroup() %>% 
+  select(date, source, tobaseline) %>% 
+  filter(source != "Hydro Pumped Storage") %>% 
+  ggplot(aes(date, tobaseline, color = source, group = source))+
+  geom_line()+
+  theme_bw()+
+  scale_color_viridis_d()
+
+plotly::ggplotly(p1)
+```
+```{r}
+
+value_analysis_yearly <- 
+  value_analysis_prep %>% 
+  group_by(year = year(start), source) %>% 
+  summarise(
+    total_prod = sum(quantity), 
+    total_revenue = sum(revenue),
+    normalized_revenue = total_revenue/total_prod,
+    tobaseline = normalized_revenue/mean(price),
+  ) %>% 
+  ungroup() %>% 
+  group_by(year) %>% 
+  mutate(
+    total_aggr_prod = sum(total_prod),
+    share = round(total_prod/total_aggr_prod, 4)
+  ) %>% 
+  ungroup() %>% 
+  mutate(across(where(is.numeric), round, digits = 2)) %>% 
+  select(year, source, value_factor = tobaseline, share) %>% 
+  arrange(source, year)
+
+value_analysis_yearly
+```
+
